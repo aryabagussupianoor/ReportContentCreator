@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MCP Growth Hub – Executive Report & Performance Tracker</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- SheetJS Excel & CSV Parser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            mcp: {
+              navy: '#0F172A',
+              teal: '#0F5C5C',
+              tealDark: '#0A3F40',
+              amber: '#D97706',
+              rose: '#E11D48',
+              slate: '#1E293B'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .bar-grow {
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* Print Optimization Styles */
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .card-print { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+      .print-break-inside { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- TOP EXECUTIVE HEADER -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-lg no-print">
+    <div class="max-w-[1500px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      {/* Brand & Project Info */}
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-md">
+          <i class="fa-solid fa-building-circle-check"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-[11px] uppercase font-bold tracking-wider text-amber-400">PT Mega Central Propertindo</span>
+            <span id="roleBadge" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <i class="fa-solid fa-eye mr-1"></i> Executive View Mode
+            </span>
+          </div>
+          <h1 class="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+            Grand Valencia Regency – Growth Hub
+          </h1>
+        </div>
+      </div>
+
+      {/* Control Actions & Period Selector */}
+      <div class="flex flex-wrap items-center gap-2.5">
+
+        {/* Period Selector Group */}
+        <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
+          <i class="fa-solid fa-calendar-days text-amber-400 ml-2.5 mr-1.5"></i>
+          
+          <select id="selYear" onchange="changePeriod()" class="bg-transparent font-semibold text-white focus:outline-none cursor-pointer pr-1">
+            <option value="2026" class="bg-slate-900">2026</option>
+            <option value="2027" class="bg-slate-900">2027</option>
+          </select>
+          
+          <span class="text-slate-600 mx-1">|</span>
+          
+          <select id="selMonth" onchange="changePeriod()" class="bg-transparent font-semibold text-white focus:outline-none cursor-pointer pr-1">
+            <option value="Oktober" class="bg-slate-900">Oktober</option>
+            <option value="November" class="bg-slate-900">November</option>
+            <option value="Desember" class="bg-slate-900">Desember</option>
+          </select>
+
+          <span class="text-slate-600 mx-1">|</span>
+
+          <select id="selWeek" onchange="changePeriod()" class="bg-transparent font-semibold text-amber-300 focus:outline-none cursor-pointer">
+            <option value="Total" class="bg-slate-900">Total Bulanan</option>
+            <option value="Minggu 1" class="bg-slate-900">Minggu 1</option>
+            <option value="Minggu 2" class="bg-slate-900">Minggu 2</option>
+            <option value="Minggu 3" class="bg-slate-900">Minggu 3</option>
+            <option value="Minggu 4" class="bg-slate-900">Minggu 4</option>
+          </select>
+        </div>
+
+        {/* Theme Switcher */}
+        <button onclick="toggleTheme()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Ganti Mode Gelap/Terang">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+
+        {/* Print / Export PDF */}
+        <button onclick="window.print()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i>
+          <span class="hidden sm:inline">Cetak PDF</span>
+        </button>
+
+        {/* Download View-Only HTML File */}
+        <button onclick="exportExecutiveHTML()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 text-white transition flex items-center gap-1.5" title="Download Laporan Format HTML">
+          <i class="fa-solid fa-download"></i>
+          <span class="hidden md:inline">Export Link Share</span>
+        </button>
+
+        {/* Role Toggle Button */}
+        <button id="btnRoleToggle" onclick="toggleRoleModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-lock"></i>
+          <span id="btnRoleText">Mode Master Edit</span>
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  {/* TAB NAVIGATION */}
+  <nav className="bg-slate-900/90 border-b border-slate-800 no-print sticky top-[57px] z-30 backdrop-blur-md">
+    <div class="max-w-[1500px] mx-auto px-4 sm:px-6 flex space-x-2 overflow-x-auto py-2 scrollbar-none" id="tabsNav">
+      <!-- Tabs generated dynamically by JS -->
+    </div>
+  </nav>
+
+  {/* MAIN REPORT VIEW */}
+  <main class="flex-1 max-w-[1500px] w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    {/* TOP EXECUTIVE WoW & MoM STAT CARDS */}
+    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4" id="kpiGrid">
+      <!-- KPI cards populated by JS -->
+    </div>
+
+    {/* PERFORMANCE SUMMARY & EXECUTIVE NOTES CARD */}
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-check text-amber-500"></i>
+          Executive Summary & Highlight Periode (<span id="txtPeriodTitle">Oktober 2026</span>)
+        </h2>
+        <span id="saveStatus" class="text-xs text-slate-400 font-medium"></span>
+      </div>
+      <div id="notesContainer">
+        <!-- Textarea in Master mode, Paragraph in Executive mode -->
+      </div>
+    </div>
+
+    {/* MAIN CONTENT TAB CONTAINER */}
+    <div id="tabContentArea">
+      <!-- Dynamic Tab view populated by JS -->
+    </div>
+
+  </main>
+
+  {/* FOOTER */}
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 no-print mt-auto">
+    <div class="max-w-[1500px] mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+      <div>
+        <strong>PT Mega Central Propertindo</strong> &copy; 2026 Growth & Digital Performance Tracker
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Project: <strong class="text-amber-600 dark:text-amber-400">Grand Valencia Regency</strong></span>
+        <span>Storage: <strong id="storageType">Browser LocalStorage</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  {/* PIN SECURITY MODAL FOR EDIT MODE */}
+  <div id="pinModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center">
+      <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Otentikasi Master Edit Mode</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Masukkan PIN Admin untuk membuka hak akses edit data (Default PIN: <code class="font-bold text-amber-600">1234</code>)</p>
+      
+      <input type="password" id="inputPin" placeholder="Masukkan 4 Digit PIN" maxlength="6" 
+        class="w-full text-center tracking-widest text-lg font-bold px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mb-4 focus:outline-none focus:border-amber-500">
+      
+      <div class="flex space-x-2">
+        <button onclick="closePinModal()" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200">
+          Batal
+        </button>
+        <button onclick="verifyPin()" class="flex-1 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-600 shadow-md">
+          Verifikasi PIN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* SPREADSHEET PASTE MODAL */}
+  <div id="pasteModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-xl shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-paste text-amber-500"></i>
+          Tempel Baris Dari Spreadsheet (Google Sheets / Excel)
+        </h3>
+        <button onclick="closePasteModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-3" id="pasteModalInstructions">
+        Salin baris data dari spreadsheet sesuai urutan kolom tabel, lalu tempelkan teksnya di bawah ini:
+      </p>
+      <textarea id="pasteTxt" rows="6" placeholder="Tempelkan data TSV/Excel di sini..." class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-none focus:border-amber-500 mb-4"></textarea>
+      <div class="flex justify-end space-x-2">
+        <button onclick="closePasteModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Batal</button>
+        <button onclick="applyPasteData()" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-600">Proses & Tambahkan</button>
+      </div>
+    </div>
+  </div>
+
+  {/* CORE APPLICATION LOGIC SCRIPT */}
+  <script>
+    // Master Access Lock & Database Storage State
+    let isAdminMode = false;
+    const MASTER_PIN = "1234";
+
+    let curYear = "2026";
+    let curMonth = "Oktober";
+    let curWeek = "Total"; // Total, Minggu 1, Minggu 2, Minggu 3, Minggu 4
+    let activeTab = "Ringkasan";
+    let pasteTargetKey = null;
+
+    // Initial Database across periods
+    const DEFAULT_PERIOD_DATA = {
+      "2026-Oktober-Total": {
+        notes: "Oktober 2026: Total 22 dari 52 konten target sudah tayang (42%). Jangkauan Instagram banyak ditopang iklan Meta Ads, sedangkan konten organik berada di kisaran 120–300 views. Campaign 'Video CCTV Promo Motor' menghasilkan 31 WhatsApp Chat Leads dari 166 klik dengan 2 Closing Unit.",
+        targets: [
+          { f: "Commercial Video", target: 6, done: 3 },
+          { f: "Reels / TikTok", target: 18, done: 4 },
+          { f: "Daily Story", target: 16, done: 14 },
+          { f: "Feed Photo / Graphic", target: 12, done: 1 }
+        ],
+        acc: [
+          { wk: "Minggu 1", pf: "Instagram", views: 19632, reach: 13100, inter: 223, note: "Organik 10.451 + iklan 9.181; dominan laki-laki 25–34 thn" },
+          { wk: "Minggu 2", pf: "Instagram", views: 23340, reach: 14316, inter: 183, note: "91,7% bukan pengikut; 172 kunjungan profil, 8 ketukan link bio" },
+          { wk: "Minggu 3", pf: "Instagram", views: 18200, reach: 11400, inter: 195, note: "Reels simulasi KPR paling tinggi engagement rate" },
+          { wk: "Minggu 4", pf: "Instagram", views: 24500, reach: 15200, inter: 310, note: "Promo sepeda motor memicu interaksi DM tinggi" },
+          { wk: "Minggu 1", pf: "TikTok", views: 12400, reach: 9800, inter: 150, note: "Traffic 55,6% dari kata kunci pencarian Banjarbaru" },
+          { wk: "Minggu 2", pf: "TikTok", views: 50700, reach: 41000, inter: 386, note: "386 suka, 13 komentar, 372 share; 70.4% masuk FYP" }
+        ],
+        posts: [
+          { title: "3 Tips Sebelum Membeli Rumah Banjarbaru", type: "Edukasi", date: "21 Okt", ig: 966, tt: 238, note: "IG 32 interaksi; TikTok 72% penonton baru" },
+          { title: "Promo Akhir Tahun (Konsep CCTV Maling)", type: "Commercial", date: "23 Okt", ig: 13700, tt: 9200, note: "IG 9.204 dari iklan; 12 follower baru" },
+          { title: "Cara Bangunin Bos Yang Suka Tidur", type: "Humor + Promo", date: "25 Okt", ig: 1900, tt: 273, note: "Waktu tonton IG 25 detik; format chat WhatsApp menahan paling lama" },
+          { title: "POV Lagi Ngerekam, Ada Orang Lewat", type: "Humor", date: "29 Okt", ig: 296, tt: 136, note: "Waktu tonton IG 10 detik" },
+          { title: "Beli Rumah Gratis Sepeda Motor", type: "Commercial", date: "31 Okt", ig: 209, tt: 126, note: "Penonton TikTok banyak berhenti di detik 0:02" }
+        ],
+        ads: [
+          { name: "Video CCTV Promo Motor", start: "24 Okt 2026", end: "30 Okt 2026", spend: 450000, reach: 16422, imp: 24939, clk: 166, chat: 31, closing: 2, eval: "CTR 0,67% tergolong rendah, namun conversion klik ke WA Chat mencapai 18.7%. Sangat potensial!" }
+        ],
+        fi: [
+          { tag: "Tinggi", title: "Banyak Konten Siap di Bank Data, Sedikit Yang Tayang", desc: "Baru 22 dari 52 target tayang. Ada 10 Reels menunggu di Bank Content." },
+          { tag: "Tinggi", title: "Organik Kecil, Reach Ditopang Meta Ads", desc: "Reels organik 120-300 views. 47% tayangan IG berasal dari iklan berbayar." },
+          { tag: "Sedang", title: "Kebocoran Profil Instagram", desc: "172 kunjungan profil namun hanya 8 ketukan link WA (4,7%). Bio & Highlights perlu direvisi." }
+        ],
+        todo: [
+          { t: "Upload 10 Reels dari Bank Content (3-4 per minggu)", done: false },
+          { t: "Produksi 4 carousel edukasi KPR untuk November", done: false },
+          { t: "Tes 3 variasi hook iklan Meta Ads yang berbeda", done: true },
+          { t: "Optimasi Bio IG & Linktree WhatsApp Admin MCP", done: true }
+        ]
+      },
+      "2026-November-Total": {
+        notes: "November 2026: Eksekusi Bank Content berjalan optimal. Capaian target konten naik menjadi 78%. Campaign Meta Ads 'Simulasi Gaji 5 Juta' menghasilkan 48 WA Chat Leads dengan biaya per chat lebih murah (Rp 11.450/chat). Total 4 unit closing tercapai.",
+        targets: [
+          { f: "Commercial Video", target: 6, done: 5 },
+          { f: "Reels / TikTok", target: 18, done: 15 },
+          { f: "Daily Story", target: 16, done: 16 },
+          { f: "Feed Photo / Graphic", target: 12, done: 8 }
+        ],
+        acc: [
+          { wk: "Minggu 1", pf: "Instagram", views: 28500, reach: 18200, inter: 410, note: "Carousel edukasi gaji 5 juta viral organik" },
+          { wk: "Minggu 2", pf: "Instagram", views: 34100, reach: 22000, inter: 530, note: "Drone showcase Grand Valencia mendapat 40+ saves" }
+        ],
+        posts: [
+          { title: "Gaji 5 Juta Bisa Beli Rumah di Banjarbaru?", type: "Edukasi Carousel", date: "04 Nov", ig: 4800, tt: 3100, note: "Simpanan postingan mencapai 84 kali" },
+          { title: "Tur Drone 4K Facade Grand Valencia Regency", type: "Drone Showcase", date: "08 Nov", ig: 12500, tt: 18900, note: "High retention 82% menonton sampai selesai" }
+        ],
+        ads: [
+          { name: "Meta Ads: Simulasi Gaji 5 Juta", start: "01 Nov 2026", end: "15 Nov 2026", spend: 550000, reach: 28900, imp: 41000, clk: 310, chat: 48, closing: 4, eval: "Kinerja sangat memuaskan, Cost per Lead turun ke Rp 11.450." }
+        ],
+        fi: [
+          { tag: "Sedang", title: "Respon Chat WA Perlu Dipercepat", desc: "Rata-rata waktu balas admin 25 menit. Perlu integrasi ManyChat / Auto-reply." }
+        ],
+        todo: [
+          { t: "Implementasi ManyChat Auto Response di Instagram DM", done: false },
+          { t: "Follow up 12 Prospect Hot Lead bulan Oktober", done: true }
+        ]
+      }
+    };
+
+    // Data Store Initialization
+    let DB = (() => {
+      const saved = localStorage.getItem("mcp_growth_hub_v4_db");
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+      return DEFAULT_PERIOD_DATA;
+    })();
+
+    function saveDB() {
+      localStorage.setItem("mcp_growth_hub_v4_db", JSON.stringify(DB));
+      const statusEl = document.getElementById("saveStatus");
+      if (statusEl) {
+        statusEl.textContent = "Tersimpan otomatis (" + new Date().toLocaleTimeString('id-ID') + ")";
+        setTimeout(() => statusEl.textContent = "", 3000);
+      }
+    }
+
+    function getCurKey() {
+      return `${curYear}-${curMonth}-${curWeek}`;
+    }
+
+    function getPeriodData(key = getCurKey()) {
+      if (!DB[key]) {
+        // Fallback or inherit structure
+        DB[key] = {
+          notes: `Laporan & Catatan Periode ${key.replace(/-/g, ' ')}...`,
+          targets: [
+            { f: "Commercial Video", target: 6, done: 0 },
+            { f: "Reels / TikTok", target: 18, done: 0 },
+            { f: "Daily Story", target: 16, done: 0 },
+            { f: "Feed Photo / Graphic", target: 12, done: 0 }
+          ],
+          acc: [],
+          posts: [],
+          ads: [],
+          fi: [],
+          todo: []
+        };
+      }
+      return DB[key];
+    }
+
+    // --- WoW & MoM METRICS COMPARISON CALCULATOR ---
+    function getPreviousPeriodKey() {
+      if (curMonth === "November") return `2026-Oktober-${curWeek}`;
+      if (curMonth === "Desember") return `2026-November-${curWeek}`;
+      return null; // First period
+    }
+
+    function calculateMetrics() {
+      const curData = getPeriodData();
+      const prevKey = getPreviousPeriodKey();
+      const prevData = prevKey ? DB[prevKey] : null;
+
+      // Current Period Aggregates
+      const totalTarget = curData.targets.reduce((a, b) => a + Number(b.target || 0), 0);
+      const totalDone = curData.targets.reduce((a, b) => a + Number(b.done || 0), 0);
+      const targetPct = totalTarget ? Math.round((totalDone / totalTarget) * 100) : 0;
+
+      const totalIgViews = curData.acc.filter(a => a.pf === 'Instagram').reduce((a, b) => a + Number(b.views || 0), 0) +
+                           curData.posts.reduce((a, b) => a + Number(b.ig || 0), 0);
+
+      const totalTtViews = curData.acc.filter(a => a.pf === 'TikTok').reduce((a, b) => a + Number(b.views || 0), 0) +
+                           curData.posts.reduce((a, b) => a + Number(b.tt || 0), 0);
+
+      const totalChats = curData.ads.reduce((a, b) => a + Number(b.chat || 0), 0);
+      const totalSpend = curData.ads.reduce((a, b) => a + Number(b.spend || 0), 0);
+      const costPerChat = totalChats ? Math.round(totalSpend / totalChats) : 0;
+      const totalClosings = curData.ads.reduce((a, b) => a + Number(b.closing || 0), 0);
+
+      // Previous Period Aggregates for % Change
+      let prevIgViews = 0, prevTtViews = 0, prevChats = 0, prevTargetPct = 0;
+      if (prevData) {
+        const pTarget = prevData.targets.reduce((a, b) => a + Number(b.target || 0), 0);
+        const pDone = prevData.targets.reduce((a, b) => a + Number(b.done || 0), 0);
+        prevTargetPct = pTarget ? Math.round((pDone / pTarget) * 100) : 0;
+
+        prevIgViews = prevData.acc.filter(a => a.pf === 'Instagram').reduce((a, b) => a + Number(b.views || 0), 0) +
+                      prevData.posts.reduce((a, b) => a + Number(b.ig || 0), 0);
+
+        prevTtViews = prevData.acc.filter(a => a.pf === 'TikTok').reduce((a, b) => a + Number(b.views || 0), 0) +
+                      prevData.posts.reduce((a, b) => a + Number(b.tt || 0), 0);
+
+        prevChats = prevData.ads.reduce((a, b) => a + Number(b.chat || 0), 0);
+      }
+
+      const getGrowthBadge = (curr, prev) => {
+        if (!prev) return `<span class="text-[10px] font-semibold text-slate-400">Target Periode</span>`;
+        const diff = curr - prev;
+        const pctChange = Math.round((diff / prev) * 100);
+        if (pctChange >= 0) {
+          return `<span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5"><i class="fa-solid fa-arrow-trend-up"></i> +${pctChange}% MoM</span>`;
+        } else {
+          return `<span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5"><i class="fa-solid fa-arrow-trend-down"></i> ${pctChange}% MoM</span>`;
+        }
+      };
+
+      return {
+        totalDone, totalTarget, targetPct, prevTargetPct,
+        totalIgViews, prevIgViews,
+        totalTtViews, prevTtViews,
+        totalChats, prevChats,
+        costPerChat, totalClosings,
+        getGrowthBadge
+      };
+    }
+
+    // --- RENDER TOP METRIC CARDS ---
+    function renderKpiCards() {
+      const m = calculateMetrics();
+
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between card-print">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Capaian Target</span>
+            ${m.getGrowthBadge(m.targetPct, m.prevTargetPct)}
+          </div>
+          <div class="my-2">
+            <span class="text-2xl font-black text-amber-600 dark:text-amber-400">${m.totalDone} / ${m.totalTarget}</span>
+            <span class="text-xs text-slate-500 ml-1">Konten (${m.targetPct}%)</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div class="bg-amber-500 h-2 rounded-full bar-grow" style="width: ${m.targetPct}%"></div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between card-print">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Views IG</span>
+            ${m.getGrowthBadge(m.totalIgViews, m.prevIgViews)}
+          </div>
+          <div class="my-1">
+            <span class="text-2xl font-black text-slate-900 dark:text-white">${m.totalIgViews.toLocaleString('id-ID')}</span>
+          </div>
+          <span class="text-[11px] text-slate-400">Instagram @mcpofficial.id</span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between card-print">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Views TikTok</span>
+            ${m.getGrowthBadge(m.totalTtViews, m.prevTtViews)}
+          </div>
+          <div class="my-1">
+            <span class="text-2xl font-black text-slate-900 dark:text-white">${m.totalTtViews.toLocaleString('id-ID')}</span>
+          </div>
+          <span class="text-[11px] text-slate-400">TikTok Video Impressions</span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-teal-200 dark:border-teal-900/40 shadow-sm flex flex-col justify-between card-print">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">WA Chat Leads</span>
+            ${m.getGrowthBadge(m.totalChats, m.prevChats)}
+          </div>
+          <div class="my-1">
+            <span class="text-2xl font-black text-teal-700 dark:text-teal-300">${m.totalChats} Chat</span>
+          </div>
+          <span class="text-[11px] text-slate-400">Prospect Inquiries Meta Ads</span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between card-print">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cost Per Lead (CPR)</span>
+          <div class="my-1">
+            <span class="text-xl font-black text-slate-900 dark:text-white">${m.costPerChat ? 'Rp ' + m.costPerChat.toLocaleString('id-ID') : '-'}</span>
+          </div>
+          <span class="text-[11px] text-slate-400">Efisiensi Biaya Per Chat</span>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 shadow-sm flex flex-col justify-between card-print">
+          <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Closing Unit</span>
+          <div class="my-1">
+            <span class="text-2xl font-black text-emerald-700 dark:text-emerald-300">${m.totalClosings} Unit</span>
+          </div>
+          <span class="text-[11px] text-emerald-600 font-semibold">Grand Valencia Regency</span>
+        </div>
+      `;
+    }
+
+    // --- TAB RENDERING DEFINITIONS ---
+    const TABS = [
+      { id: "Ringkasan", label: "Executive Dashboard", icon: "fa-chart-pie" },
+      { id: "Targets", label: "Target vs Realisasi", icon: "fa-bullseye" },
+      { id: "Mingguan", label: "Performa Sosmed", icon: "fa-table-cells" },
+      { id: "Posts", label: "Detail Konten", icon: "fa-film" },
+      { id: "AdsFunnel", label: "Meta Ads & Funnel", icon: "fa-filter" },
+      { id: "Evaluasi", label: "Evaluasi & Action Plan", icon: "fa-clipboard-list" }
+    ];
+
+    function renderTabsNav() {
+      const container = document.getElementById('tabsNav');
+      container.innerHTML = TABS.map(t => `
+        <button onclick="switchTab('${t.id}')" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+          activeTab === t.id 
+            ? 'bg-amber-500 text-slate-950 shadow-md' 
+            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+        }">
+          <i class="fa-solid ${t.icon}"></i>
+          <span>${t.label}</span>
+        </button>
+      `).join('');
+    }
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      renderTabsNav();
+      renderActiveTabContent();
+    }
+
+    function renderNotes() {
+      const container = document.getElementById('notesContainer');
+      const data = getPeriodData();
+      document.getElementById('txtPeriodTitle').textContent = `${curMonth} ${curYear} (${curWeek})`;
+
+      if (isAdminMode) {
+        container.innerHTML = `
+          <textarea id="inputNotes" rows="3" oninput="updateNotes(this.value)" 
+            class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:border-amber-500"
+            placeholder="Tuliskan ringkasan eksekutif untuk manajemen di sini...">${data.notes || ''}</textarea>
+        `;
+      } else {
+        container.innerHTML = `
+          <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+            ${data.notes || 'Belum ada catatan ringkasan eksekutif untuk periode ini.'}
+          </p>
+        `;
+      }
+    }
+
+    function updateNotes(val) {
+      getPeriodData().notes = val;
+      saveDB();
+    }
+
+    // --- MAIN CONTENT TAB VIEWS ---
+    function renderActiveTabContent() {
+      const container = document.getElementById('tabContentArea');
+      const data = getPeriodData();
+
+      if (activeTab === 'Ringkasan') {
+        // Visual Ads Funnel Calculations
+        const lastAd = data.ads[data.ads.length - 1] || {};
+        const reach = Number(lastAd.reach || 0);
+        const imp = Number(lastAd.imp || 0);
+        const clk = Number(lastAd.clk || 0);
+        const chat = Number(lastAd.chat || 0);
+        const closing = Number(lastAd.closing || 0);
+
+        const ctrPct = imp ? ((clk / imp) * 100).toFixed(2) : 0;
+        const chatPct = clk ? ((chat / clk) * 100).toFixed(1) : 0;
+        const closingPct = chat ? ((closing / chat) * 100).toFixed(1) : 0;
+
+        container.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* META ADS FUNNEL VISUALIZER */}
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-4 flex items-center justify-between">
+                <span><i class="fa-solid fa-filter text-teal-600 mr-2"></i> Conversion Funnel Meta Ads</span>
+                <span class="text-xs font-medium text-slate-400">${lastAd.name || 'Semua Campaign'}</span>
+              </h3>
+
+              <div class="space-y-3">
+                <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-slate-600 dark:text-slate-300">1. Total Reach (Jangkauan Iklan)</span>
+                    <span class="text-slate-900 dark:text-white">${reach.toLocaleString('id-ID')} Users</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 100%"></div>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-slate-600 dark:text-slate-300">2. Impresi Video</span>
+                    <span class="text-slate-900 dark:text-white">${imp.toLocaleString('id-ID')} Impresi</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-indigo-500 h-2.5 rounded-full" style="width: ${reach ? Math.min(100, Math.round((imp/reach)*100)) : 0}%"></div>
+                  </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-slate-600 dark:text-slate-300">3. Klik Tautan (CTR: ${ctrPct}%)</span>
+                    <span class="text-amber-600 dark:text-amber-400">${clk.toLocaleString('id-ID')} Clicks</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${imp ? Math.max(8, Math.round((clk/imp)*100*3)) : 0}%"></div>
+                  </div>
+                </div>
+
+                <div class="bg-teal-50 dark:bg-teal-950/40 p-3 rounded-xl border border-teal-200 dark:border-teal-900/60">
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-teal-800 dark:text-teal-300">4. Lead Chat WhatsApp (Klik -> Chat: ${chatPct}%)</span>
+                    <span class="text-teal-700 dark:text-teal-300 font-extrabold">${chat} Prospect Chat</span>
+                  </div>
+                  <div class="w-full bg-teal-200 dark:bg-teal-900/60 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-teal-500 h-2.5 rounded-full" style="width: ${clk ? Math.max(12, Math.round((chat/clk)*100)) : 0}%"></div>
+                  </div>
+                </div>
+
+                <div class="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/60">
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-emerald-800 dark:text-emerald-300">5. Sales Closing Unit (Conversion: ${closingPct}%)</span>
+                    <span class="text-emerald-700 dark:text-emerald-300 font-extrabold">${closing} Unit Sold</span>
+                  </div>
+                  <div class="w-full bg-emerald-200 dark:bg-emerald-900/60 h-2.5 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-2.5 rounded-full" style="width: ${chat ? Math.max(15, Math.round((closing/chat)*100)) : 0}%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* KEY FINDINGS & STRATEGIC RECOMMENDATIONS */}
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                Temuan Evaluasi Strategis Utama
+              </h3>
+
+              <div class="space-y-3">
+                ${data.fi.length === 0 ? '<p class="text-xs text-slate-400 italic">Belum ada temuan evaluasi dicatat.</p>' : data.fi.map(item => `
+                  <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                        item.tag === 'Tinggi' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' :
+                        item.tag === 'Sedang' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+                        'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                      }">Prioritas ${item.tag}</span>
+                      <strong class="text-xs text-slate-900 dark:text-white">${item.title}</strong>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">${item.desc}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+          </div>
+        `;
+      } else if (activeTab === 'Targets') {
+        renderTargetsTab(container, data);
+      } else if (activeTab === 'Mingguan') {
+        renderSosmedTab(container, data);
+      } else if (activeTab === 'Posts') {
+        renderPostsTab(container, data);
+      } else if (activeTab === 'AdsFunnel') {
+        renderAdsTab(container, data);
+      } else if (activeTab === 'Evaluasi') {
+        renderEvaluasiTab(container, data);
+      }
+    }
+
+    // --- TAB RENDERING IMPLEMENTATIONS ---
+    function renderTargetsTab(container, data) {
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Target vs Realisasi Konten Per Format</h3>
+            ${isAdminMode ? `
+              <div class="flex space-x-2">
+                <button onclick="addRow('targets')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah Baris</button>
+                <button onclick="openPasteModal('targets')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"><i class="fa-solid fa-file-import mr-1"></i> Paste Excel</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[11px]">
+                  <th class="py-3 px-3">Format Konten</th>
+                  <th class="py-3 px-3">Target Unit</th>
+                  <th class="py-3 px-3">Sudah Tayang</th>
+                  <th class="py-3 px-3">Persentase Capaian</th>
+                  ${isAdminMode ? '<th class="py-3 px-3 text-center">Aksi</th>' : ''}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                ${data.targets.map((row, idx) => {
+                  const pct = row.target ? Math.round((row.done / row.target) * 100) : 0;
+                  return `
+                    <tr>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="text" value="${row.f}" onchange="updateRow('targets', ${idx}, 'f', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : `<strong class="text-slate-900 dark:text-white">${row.f}</strong>`}
+                      </td>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="number" value="${row.target}" onchange="updateRow('targets', ${idx}, 'target', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : row.target}
+                      </td>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="number" value="${row.done}" onchange="updateRow('targets', ${idx}, 'done', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : row.done}
+                      </td>
+                      <td class="py-3 px-3">
+                        <div class="flex items-center gap-2">
+                          <div class="w-28 bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-2 rounded-full" style="width: ${Math.min(100, pct)}%"></div>
+                          </div>
+                          <span class="font-extrabold ${pct >= 70 ? 'text-emerald-600' : 'text-amber-600'}">${pct}%</span>
+                        </div>
+                      </td>
+                      ${isAdminMode ? `
+                        <td class="py-3 px-3 text-center">
+                          <button onclick="deleteRow('targets', ${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                      ` : ''}
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSosmedTab(container, data) {
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Metrik Akun Sosial Media (Mingguan)</h3>
+            ${isAdminMode ? `
+              <div class="flex space-x-2">
+                <button onclick="addRow('acc')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah Baris</button>
+                <button onclick="openPasteModal('acc')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"><i class="fa-solid fa-file-import mr-1"></i> Paste Excel</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[11px]">
+                  <th class="py-3 px-3">Periode</th>
+                  <th class="py-3 px-3">Platform</th>
+                  <th class="py-3 px-3">Tayangan Views</th>
+                  <th class="py-3 px-3">Reach</th>
+                  <th class="py-3 px-3">Interaksi</th>
+                  <th class="py-3 px-3">Catatan Highlight</th>
+                  ${isAdminMode ? '<th class="py-3 px-3 text-center">Aksi</th>' : ''}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                ${data.acc.map((row, idx) => `
+                  <tr>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="text" value="${row.wk}" onchange="updateRow('acc', ${idx}, 'wk', this.value)" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : row.wk}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `
+                        <select onchange="updateRow('acc', ${idx}, 'pf', this.value)" class="p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">
+                          <option value="Instagram" ${row.pf === 'Instagram' ? 'selected' : ''}>Instagram</option>
+                          <option value="TikTok" ${row.pf === 'TikTok' ? 'selected' : ''}>TikTok</option>
+                        </select>
+                      ` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${row.pf === 'Instagram' ? 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}">${row.pf}</span>`}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="number" value="${row.views}" onchange="updateRow('acc', ${idx}, 'views', Number(this.value))" class="w-28 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : Number(row.views||0).toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="number" value="${row.reach}" onchange="updateRow('acc', ${idx}, 'reach', Number(this.value))" class="w-28 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : Number(row.reach||0).toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="number" value="${row.inter}" onchange="updateRow('acc', ${idx}, 'inter', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-semibold">` : Number(row.inter||0).toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3 px-3 text-slate-600 dark:text-slate-400">
+                      ${isAdminMode ? `<input type="text" value="${row.note||''}" onchange="updateRow('acc', ${idx}, 'note', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : (row.note || '-')}
+                    </td>
+                    ${isAdminMode ? `
+                      <td class="py-3 px-3 text-center">
+                        <button onclick="deleteRow('acc', ${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                      </td>
+                    ` : ''}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPostsTab(container, data) {
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">Detail Kinerja Per Konten</h3>
+            ${isAdminMode ? `
+              <div class="flex space-x-2">
+                <button onclick="addRow('posts')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah Baris</button>
+                <button onclick="openPasteModal('posts')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"><i class="fa-solid fa-file-import mr-1"></i> Paste Excel</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[11px]">
+                  <th class="py-3 px-3">Judul Konten</th>
+                  <th class="py-3 px-3">Tipe Format</th>
+                  <th class="py-3 px-3">Tgl Upload</th>
+                  <th class="py-3 px-3">IG Views</th>
+                  <th class="py-3 px-3">TikTok Views</th>
+                  <th class="py-3 px-3">Insight Key Takeaways</th>
+                  ${isAdminMode ? '<th class="py-3 px-3 text-center">Aksi</th>' : ''}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                ${data.posts.map((row, idx) => `
+                  <tr>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="text" value="${row.title}" onchange="updateRow('posts', ${idx}, 'title', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold">` : `<strong class="text-slate-900 dark:text-white">${row.title}</strong>`}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="text" value="${row.type}" onchange="updateRow('posts', ${idx}, 'type', this.value)" class="w-28 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">${row.type}</span>`}
+                    </td>
+                    <td class="py-3 px-3">
+                      ${isAdminMode ? `<input type="text" value="${row.date}" onchange="updateRow('posts', ${idx}, 'date', this.value)" class="w-20 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : row.date}
+                    </td>
+                    <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">
+                      ${isAdminMode ? `<input type="number" value="${row.ig}" onchange="updateRow('posts', ${idx}, 'ig', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : Number(row.ig||0).toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">
+                      ${isAdminMode ? `<input type="number" value="${row.tt}" onchange="updateRow('posts', ${idx}, 'tt', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : Number(row.tt||0).toLocaleString('id-ID')}
+                    </td>
+                    <td class="py-3 px-3 text-slate-600 dark:text-slate-400">
+                      ${isAdminMode ? `<input type="text" value="${row.note||''}" onchange="updateRow('posts', ${idx}, 'note', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : (row.note || '-')}
+                    </td>
+                    ${isAdminMode ? `
+                      <td class="py-3 px-3 text-center">
+                        <button onclick="deleteRow('posts', ${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                      </td>
+                    ` : ''}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdsTab(container, data) {
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Laporan Iklan Berbayar (Meta Ads) & Conversion Leads</h3>
+              <p class="text-xs text-slate-400">Monitoring spent, cost per lead, dan closing unit perumahan</p>
+            </div>
+            ${isAdminMode ? `
+              <div class="flex space-x-2">
+                <label class="px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white cursor-pointer flex items-center gap-1.5">
+                  <i class="fa-solid fa-file-excel"></i> Upload File Meta (.xlsx/.csv)
+                  <input type="file" accept=".csv, .xlsx, .xls" onchange="parseMetaAdsFile(this)" hidden>
+                </label>
+                <button onclick="addRow('ads')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah Baris</button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 uppercase tracking-wider text-[11px]">
+                  <th class="py-3 px-3">Nama Campaign</th>
+                  <th class="py-3 px-3">Periode</th>
+                  <th class="py-3 px-3">Biaya Spent</th>
+                  <th class="py-3 px-3">Impresi</th>
+                  <th class="py-3 px-3">Klik Tautan</th>
+                  <th class="py-3 px-3">CTR (%)</th>
+                  <th class="py-3 px-3">WA Chat</th>
+                  <th class="py-3 px-3">Cost / Chat</th>
+                  <th class="py-3 px-3">Closing Unit</th>
+                  <th class="py-3 px-3">Evaluasi Campaign</th>
+                  ${isAdminMode ? '<th class="py-3 px-3 text-center">Aksi</th>' : ''}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                ${data.ads.map((row, idx) => {
+                  const ctr = row.imp ? ((row.clk / row.imp) * 100).toFixed(2) : '0';
+                  const cpr = row.chat ? Math.round(row.spend / row.chat) : 0;
+                  return `
+                    <tr>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="text" value="${row.name}" onchange="updateRow('ads', ${idx}, 'name', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold">` : `<strong class="text-slate-900 dark:text-white">${row.name}</strong>`}
+                      </td>
+                      <td class="py-3 px-3 text-slate-500">
+                        ${row.start || '-'} s/d ${row.end || '-'}
+                      </td>
+                      <td class="py-3 px-3 font-semibold text-slate-900 dark:text-white">
+                        ${isAdminMode ? `<input type="number" value="${row.spend}" onchange="updateRow('ads', ${idx}, 'spend', Number(this.value))" class="w-28 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : 'Rp ' + Number(row.spend||0).toLocaleString('id-ID')}
+                      </td>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="number" value="${row.imp}" onchange="updateRow('ads', ${idx}, 'imp', Number(this.value))" class="w-24 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : Number(row.imp||0).toLocaleString('id-ID')}
+                      </td>
+                      <td class="py-3 px-3">
+                        ${isAdminMode ? `<input type="number" value="${row.clk}" onchange="updateRow('ads', ${idx}, 'clk', Number(this.value))" class="w-20 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : Number(row.clk||0).toLocaleString('id-ID')}
+                      </td>
+                      <td class="py-3 px-3 font-bold text-amber-600 dark:text-amber-400">
+                        ${ctr}%
+                      </td>
+                      <td class="py-3 px-3 font-extrabold text-teal-700 dark:text-teal-300">
+                        ${isAdminMode ? `<input type="number" value="${row.chat}" onchange="updateRow('ads', ${idx}, 'chat', Number(this.value))" class="w-20 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : row.chat + ' Chat'}
+                      </td>
+                      <td class="py-3 px-3 font-semibold text-slate-700 dark:text-slate-300">
+                        ${cpr ? 'Rp ' + cpr.toLocaleString('id-ID') : '-'}
+                      </td>
+                      <td class="py-3 px-3 font-black text-emerald-600 dark:text-emerald-400">
+                        ${isAdminMode ? `<input type="number" value="${row.closing}" onchange="updateRow('ads', ${idx}, 'closing', Number(this.value))" class="w-16 p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : row.closing + ' Unit'}
+                      </td>
+                      <td class="py-3 px-3 text-slate-600 dark:text-slate-400">
+                        ${isAdminMode ? `<input type="text" value="${row.eval||''}" onchange="updateRow('ads', ${idx}, 'eval', this.value)" class="w-full p-1.5 rounded bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">` : (row.eval || '-')}
+                      </td>
+                      ${isAdminMode ? `
+                        <td class="py-3 px-3 text-center">
+                          <button onclick="deleteRow('ads', ${idx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                      ` : ''}
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEvaluasiTab(container, data) {
+      container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* EVALUATION FINDINGS */}
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Temuan Evaluasi Prioritas</h3>
+              ${isAdminMode ? `<button onclick="addRow('fi')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah</button>` : ''}
+            </div>
+
+            <div class="space-y-3">
+              ${data.fi.map((row, idx) => `
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                  <div class="flex items-center justify-between mb-1.5">
+                    ${isAdminMode ? `
+                      <select onchange="updateRow('fi', ${idx}, 'tag', this.value)" class="p-1 rounded text-xs font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+                        <option value="Tinggi" ${row.tag === 'Tinggi' ? 'selected' : ''}>Prioritas Tinggi</option>
+                        <option value="Sedang" ${row.tag === 'Sedang' ? 'selected' : ''}>Prioritas Sedang</option>
+                        <option value="Rendah" ${row.tag === 'Rendah' ? 'selected' : ''}>Prioritas Rendah</option>
+                      </select>
+                      <input type="text" value="${row.title}" onchange="updateRow('fi', ${idx}, 'title', this.value)" class="flex-1 ml-2 p-1 rounded font-bold text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+                      <button onclick="deleteRow('fi', ${idx})" class="ml-2 text-rose-500"><i class="fa-solid fa-trash-can"></i></button>
+                    ` : `
+                      <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                        row.tag === 'Tinggi' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' :
+                        row.tag === 'Sedang' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+                        'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                      }">Prioritas ${row.tag}</span>
+                      <strong class="text-xs text-slate-900 dark:text-white">${row.title}</strong>
+                    `}
+                  </div>
+                  ${isAdminMode ? `
+                    <textarea rows="2" onchange="updateRow('fi', ${idx}, 'desc', this.value)" class="w-full p-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded">${row.desc}</textarea>
+                  ` : `<p class="text-xs text-slate-600 dark:text-slate-400">${row.desc}</p>`}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          {/* ACTION PLAN TO-DO LIST */}
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm card-print">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white">Action Plan & Next Step To-Do List</h3>
+              ${isAdminMode ? `<button onclick="addRow('todo')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950"><i class="fa-solid fa-plus mr-1"></i> Tambah Task</button>` : ''}
+            </div>
+
+            <div class="space-y-2">
+              ${data.todo.map((row, idx) => `
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                  <div class="flex items-center space-x-3 flex-1">
+                    <input type="checkbox" ${row.done ? 'checked' : ''} ${!isAdminMode ? 'disabled' : ''} 
+                      onchange="updateRow('todo', ${idx}, 'done', this.checked)" class="w-4 h-4 text-amber-500 rounded focus:ring-amber-500 cursor-pointer">
+                    ${isAdminMode ? `
+                      <input type="text" value="${row.t}" onchange="updateRow('todo', ${idx}, 't', this.value)" class="flex-1 p-1 rounded text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-medium">
+                    ` : `
+                      <span class="text-xs font-semibold ${row.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">${row.t}</span>
+                    `}
+                  </div>
+                  ${isAdminMode ? `<button onclick="deleteRow('todo', ${idx})" class="ml-2 text-rose-500"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    // --- GENERIC TABLE EDITING HELPERS ---
+    function addRow(tableKey) {
+      const data = getPeriodData();
+      if (tableKey === 'targets') data.targets.push({ f: "Format Baru", target: 5, done: 0 });
+      else if (tableKey === 'acc') data.acc.push({ wk: "Minggu 1", pf: "Instagram", views: 0, reach: 0, inter: 0, note: "" });
+      else if (tableKey === 'posts') data.posts.push({ title: "Judul Konten Baru", type: "Reels", date: "01 Nov", ig: 0, tt: 0, note: "" });
+      else if (tableKey === 'ads') data.ads.push({ name: "Campaign Baru", start: "", end: "", spend: 0, imp: 0, clk: 0, chat: 0, closing: 0, eval: "" });
+      else if (tableKey === 'fi') data.fi.push({ tag: "Sedang", title: "Temuan Baru", desc: "" });
+      else if (tableKey === 'todo') data.todo.push({ t: "Tugas Baru", done: false });
+      
+      saveDB();
+      renderKpiCards();
+      renderActiveTabContent();
+    }
+
+    function updateRow(tableKey, idx, field, val) {
+      const data = getPeriodData();
+      data[tableKey][idx][field] = val;
+      saveDB();
+      renderKpiCards();
+    }
+
+    function deleteRow(tableKey, idx) {
+      const data = getPeriodData();
+      data[tableKey].splice(idx, 1);
+      saveDB();
+      renderKpiCards();
+      renderActiveTabContent();
+    }
+
+    // --- SPREADSHEET PASTE & META ADS FILE PARSER ---
+    function openPasteModal(targetKey) {
+      pasteTargetKey = targetKey;
+      document.getElementById('pasteModal').classList.remove('hidden');
+    }
+
+    function closePasteModal() {
+      document.getElementById('pasteModal').classList.add('hidden');
+      document.getElementById('pasteTxt').value = "";
+    }
+
+    function applyPasteData() {
+      const txt = document.getElementById('pasteTxt').value.trim();
+      if (!txt || !pasteTargetKey) return closePasteModal();
+
+      const lines = txt.split('\n').filter(l => l.trim());
+      const data = getPeriodData();
+
+      lines.forEach(line => {
+        const parts = line.split('\t');
+        if (pasteTargetKey === 'targets') {
+          data.targets.push({ f: parts[0] || 'Reels', target: Number(parts[1]||0), done: Number(parts[2]||0) });
+        } else if (pasteTargetKey === 'acc') {
+          data.acc.push({ wk: parts[0]||'Minggu 1', pf: parts[1]||'Instagram', views: Number(parts[2]||0), reach: Number(parts[3]||0), inter: Number(parts[4]||0), note: parts[5]||'' });
+        } else if (pasteTargetKey === 'posts') {
+          data.posts.push({ title: parts[0]||'Konten', type: parts[1]||'Reels', date: parts[2]||'Tgl', ig: Number(parts[3]||0), tt: Number(parts[4]||0), note: parts[5]||'' });
+        }
+      });
+
+      saveDB();
+      closePasteModal();
+      renderKpiCards();
+      renderActiveTabContent();
+    }
+
+    function parseMetaAdsFile(inputEl) {
+      const file = inputEl.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const workbook = XLSX.read(e.target.result, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+          let spendSum = 0, impSum = 0, clkSum = 0, chatSum = 0;
+          json.forEach(row => {
+            Object.keys(row).forEach(k => {
+              const keyLow = k.toLowerCase();
+              const val = Number(String(row[k]).replace(/[^0-9.-]+/g,"")) || 0;
+              if (keyLow.includes('amount spent') || keyLow.includes('biaya')) spendSum += val;
+              if (keyLow.includes('impressions') || keyLow.includes('impresi')) impSum += val;
+              if (keyLow.includes('clicks') || keyLow.includes('klik')) clkSum += val;
+              if (keyLow.includes('messaging') || keyLow.includes('chat') || keyLow.includes('results')) chatSum += val;
+            });
+          });
+
+          const data = getPeriodData();
+          data.ads.push({
+            name: file.name.replace(/\.[^/.]+$/, ""),
+            start: new Date().toLocaleDateString('id-ID'),
+            end: "-",
+            spend: spendSum,
+            imp: impSum,
+            clk: clkSum,
+            chat: chatSum,
+            closing: 0,
+            eval: "File ekspor terurai otomatis dari Meta Ads"
+          });
+
+          saveDB();
+          renderKpiCards();
+          renderActiveTabContent();
+          alert(`File Meta Ads ${file.name} berhasil diimpor! Total spent: Rp ${spendSum.toLocaleString('id-ID')}`);
+        } catch(err) {
+          alert('Gagal membaca file Meta Ads. Pastikan format CSV atau XLSX valid.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // --- ROLE MANAGEMENT & MODAL LOCK ---
+    function toggleRoleModal() {
+      if (isAdminMode) {
+        // Exit to View-Only mode directly
+        isAdminMode = false;
+        updateRoleUI();
+      } else {
+        // Prompt for PIN
+        document.getElementById('inputPin').value = "";
+        document.getElementById('pinModal').classList.remove('hidden');
+      }
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    function verifyPin() {
+      const entered = document.getElementById('inputPin').value;
+      if (entered === MASTER_PIN) {
+        isAdminMode = true;
+        closePinModal();
+        updateRoleUI();
+      } else {
+        alert("PIN salah! Akses ditolak.");
+      }
+    }
+
+    function updateRoleUI() {
+      const badge = document.getElementById('roleBadge');
+      const btnText = document.getElementById('btnRoleText');
+
+      if (isAdminMode) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+        badge.innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Master Edit Mode';
+        btnText.textContent = "Kunci (Executive View)";
+      } else {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        badge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i> Executive View Mode';
+        btnText.textContent = "Mode Master Edit";
+      }
+
+      renderNotes();
+      renderActiveTabContent();
+    }
+
+    // --- PERIOD CONTROLLER ---
+    function changePeriod() {
+      curYear = document.getElementById('selYear').value;
+      curMonth = document.getElementById('selMonth').value;
+      curWeek = document.getElementById('selWeek').value;
+
+      renderKpiCards();
+      renderNotes();
+      renderActiveTabContent();
+    }
+
+    // --- THEME SWITCHER ---
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('mcp_theme_mode', isDark ? 'dark' : 'light');
+    }
+
+    // Init Theme from LocalStorage
+    if (localStorage.getItem('mcp_theme_mode') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
+    // --- STANDALONE HTML EXPORT SNAPSHOT ---
+    function exportExecutiveHTML() {
+      const cloneDoc = document.documentElement.outerHTML;
+      const blob = new Blob([cloneDoc], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `MCP_Growth_Hub_Report_${curMonth}_${curYear}.html`;
+      a.click();
+    }
+
+    // --- INITIAL APP LAUNCH ---
+    window.onload = function() {
+      renderTabsNav();
+      renderKpiCards();
+      renderNotes();
+      renderActiveTabContent();
+    };
+  </script>
+</body>
+</html>
